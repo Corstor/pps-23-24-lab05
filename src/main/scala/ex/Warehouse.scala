@@ -2,13 +2,21 @@ package ex
 
 import util.Optionals.Optional
 import util.Sequences.*
+
 trait Item:
   def code: Int
   def name: String
   def tags: Sequence[String]
 
 object Item:
-  def apply(code: Int, name: String, tags: Sequence[String] = Sequence.empty): Item = ???
+  private case class ItemImpl(code: Int, name: String, tags: Sequence[String]) extends Item
+
+  import Sequence.*
+  def apply(code: Int, name: String, tags: String*): Item =
+    ItemImpl(code, name, tags.foldLeft(Nil[String]())(
+        (seq, tag) => Cons(tag, seq)
+      )
+    )
 
 /**
  * A warehouse is a place where items are stored.
@@ -45,26 +53,52 @@ trait Warehouse:
 end Warehouse
 
 object Warehouse:
-  def apply(): Warehouse = ???
+  private class WarehouseImpl extends Warehouse:
+    import Sequence.*
+
+    private var items: Sequence[Item] = Nil()
+    override def contains(itemCode: Int): Boolean =
+      items.find(i => i.code == itemCode).isNotEmpty
+
+    override def remove(item: Item): Unit =
+      items = items.filter(i => i != item)
+
+    override def searchItems(tag: String): Sequence[Item] =
+      items.filter(i => i.tags.contains(tag))
+
+    override def retrieve(code: Int): Optional[Item] =
+      items.find(i => i.code == code)
+
+    override def store(item: Item): Unit =
+      items = Cons(item, items)
+
+  def apply(): Warehouse = WarehouseImpl()
 
 @main def mainWarehouse(): Unit =
   val warehouse = Warehouse()
 
-  val dellXps = Item(33, "Dell XPS 15", Sequence("notebook"))
-  val dellInspiron = Item(34, "Dell Inspiron 13", Sequence("notebook"))
-  val xiaomiMoped = Item(35, "Xiaomi S1", Sequence("moped", "mobility"))
+  val dellXps = Item(33, "Dell XPS 15", "notebook")
+  val dellInspiron = Item(34, "Dell Inspiron 13", "notebook")
+  val xiaomiMoped = Item(35, "Xiaomi S1", "moped", "mobility")
 
-  warehouse.contains(dellXps.code) // false
+  println:
+    warehouse.contains(dellXps.code) // false
   warehouse.store(dellXps) // side effect, add dell xps to the warehouse
-  warehouse.contains(dellXps.code) // true
+  println:
+    warehouse.contains(dellXps.code) // true
   warehouse.store(dellInspiron) // side effect, add dell Inspiron to the warehouse
   warehouse.store(xiaomiMoped) // side effect, add xiaomi moped to the warehouse
-  warehouse.searchItems("mobility") // Sequence(xiaomiMoped)
-  warehouse.searchItems("notebook") // Sequence(dellXps, dell Inspiron)
-  warehouse.retrieve(11) // None
-  warehouse.retrieve(dellXps.code) // Just(dellXps)
+  println:
+    warehouse.searchItems("mobility") // Sequence(xiaomiMoped)
+  println:
+    warehouse.searchItems("notebook") // Sequence(dellXps, dell Inspiron)
+  println:
+    warehouse.retrieve(11) // None
+  println:
+    warehouse.retrieve(dellXps.code) // Just(dellXps)
   warehouse.remove(dellXps) // side effect, remove dell xps from the warehouse
-  warehouse.retrieve(dellXps.code) // None
+  println:
+    warehouse.retrieve(dellXps.code) // None
 
 /** Hints:
  * - Implement the Item with a simple case class

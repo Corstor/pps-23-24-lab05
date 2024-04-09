@@ -15,6 +15,8 @@ object Optionals:
       case Empty() => true
       case _ => false
 
+    def isNotEmpty: Boolean = !isEmpty
+
     def orElse[B >: A](orElse: B): B = opt match
       case Just(a) => a
       case _ => orElse
