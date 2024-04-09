@@ -4,6 +4,9 @@ import javax.swing.*;
 import java.util.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
+import javax.swing.event.MouseInputAdapter;
+import javax.swing.event.MouseInputListener;
+import java.awt.event.MouseEvent;
 import polyglot.Pair;
 public class GUI extends JFrame {
 
@@ -28,8 +31,22 @@ public class GUI extends JFrame {
                 bt.setText(String.valueOf(result.get()));
                 bt.setEnabled(false);
             } else {
-                System.out.println(logics.won() ? "WON" : "LOST");
+                JOptionPane.showMessageDialog(this, (logics.won() ? "You won!" : "You lost!"));
                 System.exit(0);
+            }
+        };
+
+        MouseInputListener onRightClick = new MouseInputAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                final JButton bt = (JButton)e.getSource();
+                if (bt.isEnabled()){
+                    if (bt.getText().equals("")) {
+                        bt.setText("F");
+                    } else {
+                        bt.setText("");
+                    }
+                }
             }
         };
 
@@ -37,6 +54,7 @@ public class GUI extends JFrame {
             for (int j=0; j<size; j++){
                 final JButton jb = new JButton(" ");
                 jb.addActionListener(al);
+                jb.addMouseListener(onRightClick);
                 this.buttons.put(jb,new Pair<>(j,i));
                 panel.add(jb);
             }
