@@ -31,6 +31,9 @@ object Optionals:
       case a if f(a) => Just(a)
       case _ => Empty()
 
+    def toOption: Option[A] = opt match
+      case Just(a) => Option(a)
+      case _ => Option.empty
 
 @main def tryOptionals =
   import Optionals.* // to work with Optionals (to see Optional type)

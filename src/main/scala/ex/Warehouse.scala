@@ -18,6 +18,20 @@ object Item:
       )
     )
 
+  object sameTag:
+    def unapply(items: Sequence[Item]): Option[String] =
+      var found: Optional[String] = Optional.Empty()
+      items match
+        case Cons(h: Item, t) => for tag <- h.tags do
+          if containsTag(t, tag)
+          then found = Optional.Just(tag)
+        case _ =>
+      found.toOption
+
+
+  private def containsTag(items: Sequence[Item], tag: String): Boolean =
+    items.allMatch(item => item.tags.contains(tag))
+
 /**
  * A warehouse is a place where items are stored.
  */
@@ -99,6 +113,18 @@ object Warehouse:
   warehouse.remove(dellXps) // side effect, remove dell xps from the warehouse
   println:
     warehouse.retrieve(dellXps.code) // None
+
+  import Sequence.*
+
+  val notebook = Item(36, "note", "notebook")
+
+  val items: Sequence[Item] = Cons(dellXps, Cons(dellInspiron, Cons(notebook, Nil())))
+
+  import Item.*
+
+  items match
+    case sameTag(t) => println(s"items have same tag $t")
+    case _ => println(s"items have different tags")
 
 /** Hints:
  * - Implement the Item with a simple case class

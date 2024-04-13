@@ -61,6 +61,14 @@ object Sequences: // Essentially, generic linkedlists
             case Cons(h, t) => _count(size + 1, t)
             case _ => size
         _count(0, sequence)
+
+      def foreach(consumer: A => Unit): Unit = sequence match
+        case Cons(h, t) => consumer(h); t.foreach(consumer)
+        case _ =>
+
+      def allMatch(f: A => Boolean): Boolean =
+        sequence.filter(f).count() == sequence.count()
+
 @main def trySequences =
   import Sequences.* 
   val sequence = Sequence(1, 2, 3)
